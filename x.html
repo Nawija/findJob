@@ -1,0 +1,88 @@
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+    }
+    h2{
+        color: rgb(67, 105, 163);
+        font-size: 1.8rem;
+        text-align: center;
+        margin: 20px 0;
+        font-family: sans-serif;
+    }
+
+    .wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 900px;
+        margin: 0 auto;
+        margin-bottom: 30px;
+
+    }
+
+    .info{
+        text-align: start;
+        font-size: 102%;
+        padding: 5px;
+    }
+
+    .links{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 23%;
+
+    }
+
+    button {
+        padding: 5px 20px;
+        background-color: rgb(67, 105, 163);
+        font-size: 104%;
+        border: none;
+        outline: none;
+        border-radius: 7px;
+        cursor: pointer;
+    }
+    
+    a {
+        box-sizing: border-box;
+        color: inherit;
+        color: white;
+        text-decoration: none;
+    }
+    .ficon{
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        font-weight: bold;
+        background-color: white;
+        color: rgb(67, 105, 163);
+        transform: translate(-50%,-50%);
+    }
+    
+    .underline{
+        position: relative;
+        height: 2px;
+        width: 30%;
+        margin: 30px auto;
+        background-color: rgb(67, 105, 163);
+    }
+</style>
+
+<body>
+    <h2>Nowa Praca:</h2>
+    <div class="wrapper">
+        <div class="info">
+            <h4>Sprzedawca, kasjer-mięsne Siedlce 3 maja 60</h4>
+            <p>Od3 200Do3 500zł/ mies. brutto</p>
+            <p>Siedlce - Dzisiaj o 15:41</p>
+        </div>
+        <div class="links">
+            <button><a href="${articules[i].link}">Szczegóły</a></button>
+        </div>
+    </div>
+    <div class="underline">
+        <div class="ficon">KW</div>
+    </div>
+</body>
