@@ -15,4 +15,12 @@
         <li>git push -u origin main</li>
     </ul>
     <p>--------------------------------------------------------------</p>
+    <h3>Plugins:</h3>
+    <ul>
+        <li>cheerio</li>
+        <li>cron</li>
+        <li>nodemailer</li>
+        <li>puppeteer</li>
+    </ul>
+    <p>--------------------------------------------------------------</p>
 </body>
