@@ -97,6 +97,7 @@ async function filterArticules() {
                 )
         );
     }
+    console.log(onlyNewOfferts.length);
 }
 
 async function onlyNewOffertsMail() {
