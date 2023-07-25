@@ -3,7 +3,8 @@
         padding: 0;
         margin: 0;
     }
-    h2{
+
+    h2 {
         color: rgb(67, 105, 163);
         font-size: 1.8rem;
         text-align: center;
@@ -21,14 +22,16 @@
 
     }
 
-    .info{
+    .info {
         text-align: start;
         font-size: 102%;
         padding: 5px;
     }
 
-    .links{
+    .links {
         display: flex;
+        flex-direction: column;
+        text-align: center;
         align-items: center;
         justify-content: center;
         width: 23%;
@@ -44,24 +47,25 @@
         border-radius: 7px;
         cursor: pointer;
     }
-    
+
     a {
         box-sizing: border-box;
         color: inherit;
         color: white;
         text-decoration: none;
     }
-    .ficon{
+
+    .ficon {
         position: absolute;
         top: 50%;
         left: 50%;
         font-weight: bold;
         background-color: white;
         color: rgb(67, 105, 163);
-        transform: translate(-50%,-50%);
+        transform: translate(-50%, -50%);
     }
-    
-    .underline{
+
+    .underline {
         position: relative;
         height: 2px;
         width: 30%;
@@ -75,10 +79,10 @@
     <div class="wrapper">
         <div class="info">
             <h4>Sprzedawca, kasjer-mięsne Siedlce 3 maja 60</h4>
-            <p>Od3 200Do3 500zł/ mies. brutto</p>
             <p>Siedlce - Dzisiaj o 15:41</p>
         </div>
         <div class="links">
+            <p>Od3 200Do3 500zł/ mies. brutto</p>
             <button><a href="${articules[i].link}">Szczegóły</a></button>
         </div>
     </div>

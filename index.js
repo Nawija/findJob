@@ -6,13 +6,9 @@ const nodemailer = require("nodemailer");
 let articules = [];
 let checkArticules = [];
 let onlyNewOfferts = [];
-let configDate = new Date();
-const dateToday = configDate.getDate();
 
-const urlOlx = "https://www.olx.pl/d/praca/siedlce/";
-const urlPracuj =
-    "https://www.pracuj.pl/praca/siedlce;wp/ostatnich%2024h;p,1?rd=0";
-
+const urlOlx =
+    "https://www.olx.pl/nieruchomosci/mieszkania/sprzedaz/siedlce/?search%5Bdist%5D=10&search%5Bfilter_float_price:to%5D=500000";
 
 async function checkJobOlx() {
     const browser = await puppeteer.launch();
@@ -26,41 +22,9 @@ async function checkJobOlx() {
         const title = $(this).find("h6").text();
         let url = $(this).find("a").attr("href");
         let link = `https://www.olx.pl/${url}`;
-        const pln = $(this).find("p").children().text();
+        const pln = $(this).find("p").not("span").text();
         const date = $(this).find(".css-1ioks24-TextStyled").text();
-        // sortDate = date.replace(/\D/gm, "");
-        if (url != undefined && date.includes("Dzisiaj")) {
-            articules.push({
-                title,
-                link,
-                pln,
-                date,
-            });
-        }
-    });
-    await browser.close();
-}
-
-async function checkJobPracuj() {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(urlPracuj, { waitUntil: "networkidle2" });
-
-    await page.reload();
-    let html = await page.evaluate(() => document.body.innerHTML);
-    const $ = cheerio.load(html);
-    $(".cjc4cz3", html).each(function () {
-        const title = $(this).find(".tu9xzpe").text();
-        let url = $(this).find("a").attr("href");
-        let link = `${url}`;
-        const pln = $(this).find(".s8i823f").text();
-        const date = $(this).find(".brgvnzp").text();
-        const localisation = $(this).find(".r4l14kw").text();
-        if (
-            url != undefined &&
-            date.includes(dateToday) &&
-            localisation.includes("Siedlce")
-        ) {
+        if (url != undefined) {
             articules.push({
                 title,
                 link,
@@ -105,14 +69,16 @@ async function onlyNewOffertsMail() {
     for (let i = 0; i < onlyNewOfferts.length; i++) {
         dateHTML += `
         <div class="wrapper">
-        <div class="info">
-            <h4>${onlyNewOfferts[i].title}</h4>
-            <p>${onlyNewOfferts[i].pln}</p>
-            <p>${onlyNewOfferts[i].date}</p>
+            <div class="info">
+                <h4>${onlyNewOfferts[i].title}</h4>
+                <p>${onlyNewOfferts[i].date}</p>
+            </div>
+            <div class="links">
+                <p>${onlyNewOfferts[i].pln}</p>
+                <button><a href="${onlyNewOfferts[i].link}">Szczegóły</a></button>
+            </div>
         </div>
-        <div class="links"><button><a href="${onlyNewOfferts[i].link}">Szczegóły</a></button></div>
-    </div>
-    <div class="underline"></div>
+        <div class="underline"></div>
         `;
     }
 
@@ -162,6 +128,8 @@ async function onlyNewOffertsMail() {
     
         .links{
             display: flex;
+            flex-direction: column;
+            text-align: center;
             align-items: center;
             justify-content: center;
             width: 33%;
@@ -208,7 +176,6 @@ async function startTracking() {
         "*/20 * * * * *",
         async function () {
             checkJobOlx();
-            checkJobPracuj();
             filterArticules();
         },
         null,
