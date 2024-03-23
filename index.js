@@ -3,10 +3,12 @@ const cheerio = require("cheerio");
 const nodemailer = require("nodemailer");
 const CronJob = require("cron").CronJob;
 
+let browser;
 const today = new Date();
 const dateToday = today.getDate();
 const dateYesterday = today.getDate() - 1;
 const dateTime = " godz.";
+let sesion = 0;
 
 let articles = [];
 let checkArticles = [];
@@ -27,11 +29,25 @@ const imgPracujPL =
 const imgPracaPL =
     "data:image/png;base64,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";
 
-async function checkJobOlxGlobal() {
+async function initializeBrowser() {
+    if (!browser) {
+        browser = await puppeteer.launch({ headless: true }).catch((error) => {
+            console.error("Błąd podczas uruchamiania przeglądarki:", error);
+            throw error;
+        });
+    }
+}
+async function checkJobOlxGlobal(page, browser) {
+    if (!browser) {
+        browser = await puppeteer.launch({ headless: true }).catch((error) => {
+            console.error("Błąd podczas uruchamiania przeglądarki:", error);
+            throw error;
+        });
+    }
     img = imgOlx;
     try {
-        const browser = await puppeteer.launch({ headless: true });
-        const page = await browser.newPage();
+        // const browser = await puppeteer.launch({ headless: true });
+        // const page = await browser.newPage();
         await page.goto(urlOlxGlobal, {
             waitUntil: "networkidle2",
             timeout: 60000,
@@ -74,11 +90,17 @@ async function checkJobOlxGlobal() {
         console.log(error);
     }
 }
-async function checkJobOlxFilter() {
+async function checkJobOlxFilter(page, browser) {
+    if (!browser) {
+        browser = await puppeteer.launch({ headless: true }).catch((error) => {
+            console.error("Błąd podczas uruchamiania przeglądarki:", error);
+            throw error;
+        });
+    }
     img = imgOlx;
     try {
-        const browser = await puppeteer.launch({ headless: true });
-        const page = await browser.newPage();
+        // const browser = await puppeteer.launch({ headless: true });
+        // const page = await browser.newPage();
         await page.goto(urlOlxFilter, {
             waitUntil: "networkidle2",
             timeout: 60000,
@@ -121,11 +143,17 @@ async function checkJobOlxFilter() {
         console.log(error);
     }
 }
-async function checkJobPracujPLFilter() {
+async function checkJobPracujPLFilter(page, browser) {
+    if (!browser) {
+        browser = await puppeteer.launch({ headless: true }).catch((error) => {
+            console.error("Błąd podczas uruchamiania przeglądarki:", error);
+            throw error;
+        });
+    }
     img = imgPracujPL;
     try {
-        const browser = await puppeteer.launch({ headless: true });
-        const page = await browser.newPage();
+        // const browser = await puppeteer.launch({ headless: true });
+        // const page = await browser.newPage();
         await page.goto(urlPracujPLFilter, {
             waitUntil: "networkidle2",
             timeout: 60000,
@@ -162,11 +190,17 @@ async function checkJobPracujPLFilter() {
         console.log(error);
     }
 }
-async function checkJobPracaPLFilter() {
+async function checkJobPracaPLFilter(page, browser) {
+    if (!browser) {
+        browser = await puppeteer.launch({ headless: true }).catch((error) => {
+            console.error("Błąd podczas uruchamiania przeglądarki:", error);
+            throw error;
+        });
+    }
     img = imgPracaPL;
     try {
-        const browser = await puppeteer.launch({ headless: true });
-        const page = await browser.newPage();
+        // const browser = await puppeteer.launch({ headless: true });
+        // const page = await browser.newPage();
         await page.goto(urlPracaPLFilter, {
             waitUntil: "networkidle2",
             timeout: 60000,
@@ -220,7 +254,9 @@ async function filterArticles() {
         const yesterdayRegExp = new RegExp(`${dateYesterday}\\s`);
 
         todayOfferts = articles.filter(({ date }) => todayRegExp.test(date));
-        yesterDayOfferts = articles.filter(({ date }) => yesterdayRegExp.test(date));
+        yesterDayOfferts = articles.filter(({ date }) =>
+            yesterdayRegExp.test(date)
+        );
 
         checkArticles = articles;
 
@@ -228,6 +264,9 @@ async function filterArticles() {
             sendMail();
         }
     }
+    console.log(`articles: `, articles.length);
+    console.log(`todayOfferts: `, todayOfferts.length);
+    console.log(`yesterDayOfferts: `, yesterDayOfferts.length);
 }
 
 async function sendMail() {
@@ -300,53 +339,66 @@ function generateEmailHTML(todayHTML, yesterdayHTML) {
     `;
 }
 
+async function startSection() {
+    await initializeBrowser();
+    console.log(`Sesja rozpoczeta...`);
+    const page = await browser.newPage();
+    try {
+        console.log(`zaczynam checkJobOlxGlobal`);
+        await checkJobOlxGlobal(page);
+        console.log(`zaczynam checkJobOlxFilter`);
+        await checkJobOlxFilter(page);
+        console.log(`zaczynam checkJobPracujPLFilter`);
+        await checkJobPracujPLFilter(page);
+        console.log(`zaczynam checkJobPracaPLFilter`);
+        await checkJobPracaPLFilter(page);
+        console.log(`Sesja udana`);
+    } catch (error) {
+        console.error("Błąd podczas sesji:", error);
+    } finally {
+        await page.close();
+        console.log(`zamykam stronę`);
+    }
+}
+
 async function startScraping() {
-    let scrapingData = 0;
-
     console.log(`Zbieram dane ...`);
-    let loadingProgress = 0;
-    const totalIterations = 3;
+    if (sesion <= 1) {
+        sesion++;
+        await initializeBrowser();
+        await startSection();
+        console.log(`Filtrowanie danych`);
+        await filterArticles();
+    }
 
-    // while (scrapingData <= totalIterations) {
-    //     await checkJobOlx();
-    //     loadingProgress = Math.round((scrapingData / totalIterations) * 100);
-    //     const progressBar = "=".repeat(loadingProgress / 2);
-    //     console.log(
-    //         `Zebranych ofert: `,
-    //         articles.length,
-    //         `[${progressBar}] ${loadingProgress}%`
-    //     );
-    //     scrapingData++;
-    // }
-    console.log(`Success!!`);
-
-    await checkJobOlxGlobal();
-    await checkJobOlxFilter();
-    await checkJobPracujPLFilter();
-    await checkJobPracaPLFilter();
-    await filterArticles();
-    console.log(`articles: `, articles.length);
-    console.log(`todayOfferts: `, todayOfferts.length);
-    console.log(`yesterDayOfferts: `, yesterDayOfferts.length);
-
-    let job = new CronJob(
-        "* */10 * * * *",
+    const job = new CronJob(
+        "* */1 * * * *",
         async function () {
-            await checkJobOlxGlobal();
-            await checkJobOlxFilter();
-            await checkJobPracujPLFilter();
-            await checkJobPracaPLFilter();
-            console.log(`articles: `, articles.length);
-            console.log(`todayOfferts: `, todayOfferts.length);
-            console.log(`yesterDayOfferts: `, yesterDayOfferts.length);
+            await initializeBrowser();
+            await startSection();
+            console.log(`Filtrowanie danych`);
+            await filterArticles();
         },
         null,
-        null,
-        null,
-        null
+        true,
+        "America/Los_Angeles"
     );
 
     job.start();
 }
 
 startScraping();
+
+// let loadingProgress = 0;
+// const totalIterations = 4;
+// while (scrapingData <= totalIterations) {
+//     await checkJobOlx();
+//     loadingProgress = Math.round((scrapingData / totalIterations) * 100);
+//     const progressBar = "=".repeat(loadingProgress / 2);
+//     console.log(
+//         `Zebranych ofert: `,
+//         articles.length,
+//         `[${progressBar}] ${loadingProgress}%`
+//     );
+//     scrapingData++;
+// }
