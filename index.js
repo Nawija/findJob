@@ -205,8 +205,7 @@ async function filterArticles() {
     }
 
     console.log(`Oferty: `, articles.length);
-    console.log(`Dzisiejsze oferty `, todayOfferts.length);
-    console.log(`Nowe oferty `, todayOfferts.length);
+    console.log(`Nowe oferty `, newOffers.length);
 }
 async function sendMail(newOffers) {
     const todayHTML = generateOfferHTML(newOffers);
@@ -266,7 +265,7 @@ function generateOfferHTML(offers) {
 function generateEmailHTML(todayHTML) {
     return `
     <body style="margin: 0; padding: 0; box-sizing: border-box; text-align: center;">
-        <h2 style="text-transform: uppercase; font-size: 18px; margin: 40px 0; background-color: #355ab8; color: #ffffff; border-radius: 7px; padding: 12px;">Dzisiejsze Oferty (${todayOfferts.length}):</h2>
+        <h2 style="text-transform: uppercase; font-size: 18px; margin: 40px 0; background-color: #355ab8; color: #ffffff; border-radius: 7px; padding: 12px;">${titleMessage}</h2>
         ${todayHTML}
     </body>
     `;
@@ -283,20 +282,20 @@ async function startSection() {
 }
 
 async function collectingData() {
-    while (scrapingData <= 3) {
+    while (scrapingData <= 10) {
         await startSection();
         scrapingData++;
     }
 }
 
 async function startCronJob() {
-    console.log(`Zbieram dane ...`);
-    // await collectingData();
+    console.log(`Zbieram dane ... przez 5 minut`);
+    await collectingData();
     console.log(`Dane zebrane`);
     await startSection();
     await filterArticles();
     const job = new CronJob(
-        "*/5 * * * *",
+        "0 * * * *",
         async function () {
             await startSection();
             await filterArticles();
