@@ -6,6 +6,7 @@ const CronJob = require("cron").CronJob;
 const headless = true;
 mailToSend = "konradwiel@interia.pl";
 let titleMessage = "Dzisiejsze oferty ";
+let firstTime = true;
 
 const today = new Date();
 const dateToday = today.getDate();
@@ -13,7 +14,6 @@ const dateTime = " godz.";
 let scrapingData = 0;
 
 let articles = [];
-let checkArticles = [];
 let todayOfferts = [];
 
 const urlOlxGlobal =
@@ -177,23 +177,39 @@ async function filterArticles() {
 
     const todayRegExp = new RegExp(`Dzisiaj|${dateTime}|${dateToday}\\s`);
 
-    checkArticles = todayOfferts;
+    // Kopia dzisiejszych ofert przed aktualizacją listy
+    const previousTodayOffers = [...todayOfferts];
 
     todayOfferts = articles.filter(({ date }) => todayRegExp.test(date));
 
-    if (todayOfferts.length !== checkArticles.length) {
-        sendMail();
-        lastSentDate = new Date();
-        console.log(lastSentDate);
-        console.log(lastSentDate.length);
-        titleMessage = "Nowa oferta ";
-    }
-    console.log(`Oferty: `, articles.length);
-    console.log(`${titleMessage} `, todayOfferts.length);
-}
+    // Sprawdzanie, czy są nowe oferty
+    const newOffers = todayOfferts.filter(
+        (offer) =>
+            !previousTodayOffers.some(
+                (prevOffer) =>
+                    prevOffer.title === offer.title &&
+                    prevOffer.date === offer.date
+            )
+    );
 
-async function sendMail() {
-    const todayHTML = generateOfferHTML(todayOfferts);
+    if (newOffers.length > 0) {
+        if (firstTime === true) {
+            titleMessage = "Dzisiejsze oferty ";
+            firstTime = false;
+        } else if (newOffers.length === 1) {
+            titleMessage = "Nowa oferta ";
+        } else {
+            titleMessage = "Nowe oferty ";
+        }
+        sendMail(newOffers);
+    }
+
+    console.log(`Oferty: `, articles.length);
+    console.log(`Dzisiejsze oferty `, todayOfferts.length);
+    console.log(`Nowe oferty `, todayOfferts.length);
+}
+async function sendMail(newOffers) {
+    const todayHTML = generateOfferHTML(newOffers);
 
     let transporter = nodemailer.createTransport({
         service: `gmail`,
@@ -207,7 +223,7 @@ async function sendMail() {
         let info = await transporter.sendMail({
             from: '"KW" <infokwbot@gmail.com>',
             to: `${mailToSend}`,
-            subject: `${titleMessage} (${todayOfferts.length})`,
+            subject: `${titleMessage} (${newOffers.length})`,
             html: generateEmailHTML(todayHTML),
         });
 
