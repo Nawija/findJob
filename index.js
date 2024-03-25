@@ -5,6 +5,7 @@ const CronJob = require("cron").CronJob;
 
 const headless = true;
 mailToSend = "konradwiel@interia.pl";
+let titleMessage = "Dzisiejsze oferty ";
 
 const today = new Date();
 const dateToday = today.getDate();
@@ -180,13 +181,12 @@ async function filterArticles() {
 
     todayOfferts = articles.filter(({ date }) => todayRegExp.test(date));
 
-
     if (todayOfferts.length !== checkArticles.length) {
         sendMail();
+        titleMessage = "Nowa oferta ";
     }
-
     console.log(`Oferty: `, articles.length);
-    console.log(`Dzisiejsze Oferty: `, todayOfferts.length);
+    console.log(`${titleMessage} `, todayOfferts.length);
 }
 
 async function sendMail() {
@@ -204,7 +204,7 @@ async function sendMail() {
         let info = await transporter.sendMail({
             from: '"KW" <infokwbot@gmail.com>',
             to: `${mailToSend}`,
-            subject: `Disiejsze Oferty (${todayOfferts.length})`,
+            subject: `${titleMessage} (${todayOfferts.length})`,
             html: generateEmailHTML(todayHTML),
         });
 

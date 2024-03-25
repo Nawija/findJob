@@ -1,3 +1,4 @@
-a = 3
-b = 2
-console.log(a + b);
+let  titleMessage = "oferta: ";
+console.log(titleMessage)
+titleMessage = "Nowa oferta: ";
+console.log(titleMessage);
