@@ -183,6 +183,9 @@ async function filterArticles() {
 
     if (todayOfferts.length !== checkArticles.length) {
         sendMail();
+        lastSentDate = new Date();
+        console.log(lastSentDate);
+        console.log(lastSentDate.length);
         titleMessage = "Nowa oferta ";
     }
     console.log(`Oferty: `, articles.length);
@@ -272,7 +275,7 @@ async function collectingData() {
 
 async function startCronJob() {
     console.log(`Zbieram dane ...`);
-    await collectingData();
+    // await collectingData();
     console.log(`Dane zebrane`);
     await startSection();
     await filterArticles();
