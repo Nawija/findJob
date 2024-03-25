@@ -8,14 +8,12 @@ mailToSend = "konradwiel@interia.pl";
 
 const today = new Date();
 const dateToday = today.getDate();
-const dateYesterday = today.getDate() - 1;
 const dateTime = " godz.";
 let scrapingData = 0;
 
 let articles = [];
 let checkArticles = [];
 let todayOfferts = [];
-let yesterDayOfferts = [];
 
 const urlOlxGlobal =
     "https://www.olx.pl/siedlce/q-praca/?search%5Border%5D=created_at%3Adesc";
@@ -90,12 +88,6 @@ async function checkJobOlxFilter() {
             timeout: 440000,
         });
         await sleep(2000);
-        // const cookies = await page.$(
-        //     'button[id="onetrust-accept-btn-handler"]'
-        // );
-        // if (cookies) {
-        //     await cookies.click();
-        // }
         let html = await page.evaluate(() => document.body.innerHTML);
         const $ = cheerio.load(html);
         $(".jobs-ad-card", html).each(function () {
@@ -183,27 +175,22 @@ async function filterArticles() {
     );
 
     const todayRegExp = new RegExp(`Dzisiaj|${dateTime}|${dateToday}\\s`);
-    const yesterdayRegExp = new RegExp(`${dateYesterday}\\s`);
 
     checkArticles = todayOfferts;
 
     todayOfferts = articles.filter(({ date }) => todayRegExp.test(date));
-    yesterDayOfferts = articles.filter(({ date }) =>
-        yesterdayRegExp.test(date)
-    );
+
 
     if (todayOfferts.length !== checkArticles.length) {
         sendMail();
     }
 
-    console.log(`articles: `, articles.length);
-    console.log(`todayOfferts: `, todayOfferts.length);
-    console.log(`yesterDayOfferts: `, yesterDayOfferts.length);
+    console.log(`Oferty: `, articles.length);
+    console.log(`Dzisiejsze Oferty: `, todayOfferts.length);
 }
 
 async function sendMail() {
     const todayHTML = generateOfferHTML(todayOfferts);
-    const yesterdayHTML = generateOfferHTML(yesterDayOfferts);
 
     let transporter = nodemailer.createTransport({
         service: `gmail`,
@@ -217,8 +204,8 @@ async function sendMail() {
         let info = await transporter.sendMail({
             from: '"KW" <infokwbot@gmail.com>',
             to: `${mailToSend}`,
-            subject: `Oferty z dzisiaj (${todayOfferts.length}), wczoraj (${yesterDayOfferts.length})`,
-            html: generateEmailHTML(todayHTML, yesterdayHTML),
+            subject: `Disiejsze Oferty (${todayOfferts.length})`,
+            html: generateEmailHTML(todayHTML),
         });
 
         console.log(`Message Sent to KW`, info.messageId);
@@ -257,13 +244,11 @@ function generateOfferHTML(offers) {
         .join("");
 }
 
-function generateEmailHTML(todayHTML, yesterdayHTML) {
+function generateEmailHTML(todayHTML) {
     return `
     <body style="margin: 0; padding: 0; box-sizing: border-box; text-align: center;">
-        <h2 style="text-transform: uppercase; font-size: 18px; margin: 40px 0; background-color: #355ab8; color: #ffffff; border-radius: 7px; padding: 12px;">Dzisiejsze Oferty (${todayOfferts}):</h2>
+        <h2 style="text-transform: uppercase; font-size: 18px; margin: 40px 0; background-color: #355ab8; color: #ffffff; border-radius: 7px; padding: 12px;">Dzisiejsze Oferty (${todayOfferts.length}):</h2>
         ${todayHTML}
-        <h2 style="text-transform: uppercase; font-size: 18px; margin: 40px 0; background-color: #355ab8; color: #ffffff; border-radius: 7px; padding: 12px;">Wczorajsze Oferty (${yesterDayOfferts}):</h2>
-        ${yesterdayHTML}
     </body>
     `;
 }
@@ -292,7 +277,7 @@ async function startCronJob() {
     await startSection();
     await filterArticles();
     const job = new CronJob(
-        "* * * * *",
+        "*/5 * * * *",
         async function () {
             await startSection();
             await filterArticles();
