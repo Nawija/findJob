@@ -11,7 +11,6 @@ let firstTime = true;
 const today = new Date();
 const dateToday = today.getDate();
 const dateTime = " godz.";
-let scrapingData = 0;
 
 let articles = [];
 let todayOfferts = [];
