@@ -329,9 +329,9 @@ function updateProgress(progress, totalIterations) {
 async function startCronJob() {
     await collectingData();
     await startSection();
-    await filterArticles();
-    const job = new CronJob(
-        "0 * * * *",
+    // await filterArticles();
+    const scrapingOferts = new CronJob(
+        "*/10 * * * *",
         async function () {
             await startSection();
             await filterArticles();
@@ -341,7 +341,19 @@ async function startCronJob() {
         "Europe/Warsaw"
     );
 
-    job.start();
+    const filterAndSendMail = new CronJob(
+        "15 18 * * *",
+        async function () {
+            await startSection();
+            await filterArticles();
+        },
+        null,
+        true,
+        "Europe/Warsaw"
+        );
+        
+        scrapingOferts.start();
+        filterAndSendMail.start();
 }
 
 startCronJob();
