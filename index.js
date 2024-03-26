@@ -296,16 +296,39 @@ async function startSection() {
 }
 
 async function collectingData() {
-    while (scrapingData <= 10) {
-        await startSection();
-        scrapingData++;
+    const totalIterations = 12;
+    let progress = 0;
+
+    process.stdout.write(`Zbieram dane: |${" ".repeat(30)}| 0%`);
+    while (progress <= totalIterations) {
+        try {
+            await checkJobOlxGlobal();
+            progress++;
+            updateProgress(progress, totalIterations);
+            await checkJobOlxFilter();
+            progress++;
+            updateProgress(progress, totalIterations);
+            await checkJobPracaPLFilter();
+            progress++;
+            updateProgress(progress, totalIterations);
+        } catch (error) {
+            console.error("Błąd podczas sesji:", error);
+        }
     }
 }
 
+function updateProgress(progress, totalIterations) {
+    const percentage = Math.floor((progress / totalIterations) * 100);
+    const barLength = Math.floor((progress / totalIterations) * 30);
+    const progressBar = "=".repeat(barLength) + " ".repeat(30 - barLength);
+
+    process.stdout.clearLine();
+    process.stdout.cursorTo(0);
+    process.stdout.write(`Zbieram dane: |${progressBar}| ${percentage}%`);
+}
+
 async function startCronJob() {
-    console.log(`Zbieram dane ... przez 5 minut`);
-    // await collectingData();
-    console.log(`Dane zebrane`);
+    await collectingData();
     await startSection();
     await filterArticles();
     const job = new CronJob(
