@@ -166,6 +166,16 @@ async function checkJobPracaPLFilter() {
     }
 }
 
+function parseDateFromString(dateString) {
+    if (dateString.includes("godz.")) {
+        const hours = parseInt(dateString.match(/\d+/)[0]);
+        return new Date(Date.now() - hours * 60 * 60 * 1000);
+    } else if (dateString.includes("Dzisiaj")) {
+        return new Date();
+    } else {
+        return new Date(dateString);
+    }
+}
 async function filterArticles() {
     articles = articles.filter(
         (value, index, self) =>
@@ -201,12 +211,16 @@ async function filterArticles() {
         } else {
             titleMessage = "Nowe oferty ";
         }
+        newOffers.sort(
+            (a, b) => parseDateFromString(b.date) - parseDateFromString(a.date)
+        );
         sendMail(newOffers);
     }
 
     console.log(`Oferty: `, articles.length);
     console.log(`Nowe oferty `, newOffers.length);
 }
+
 async function sendMail(newOffers) {
     const todayHTML = generateOfferHTML(newOffers);
 
@@ -290,7 +304,7 @@ async function collectingData() {
 
 async function startCronJob() {
     console.log(`Zbieram dane ... przez 5 minut`);
-    await collectingData();
+    // await collectingData();
     console.log(`Dane zebrane`);
     await startSection();
     await filterArticles();
